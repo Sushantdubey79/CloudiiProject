@@ -1,0 +1,448 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    width: 100%;
+    
+    
+}   
+
+.splide__slide img{
+    width: 70vw;
+}
+
+.bg{
+position: relative;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 80vw;
+    height: 100vh;
+    background-size:cover;
+margin: 0 auto;
+}
+
+.main{
+    width:100%;
+    height:400px;
+    margin: 0 auto;
+  }
+  .slider-outer{
+     height:100% !important;
+     
+    overflow:hidden;
+  }
+  .slider{
+   
+      width: 100%;
+      height: 100%;
+      
+  }
+  .slide-image{
+    width: 100%;
+      height: 100%;
+     display:block;
+      color: transparent;
+      background-size: cover;
+      -moz-background-size: cover;
+      -ms-background-size: cover;
+      -o-background-size: cover;
+      -webkit-background-size: cover;
+      background-position: 50% 50%;
+      background-repeat: none;
+  }
+  .slider .slide-item{
+    float:left;
+      padding: 0;
+      margin: 0;
+  }
+  .clear{
+    clear:both;
+  }
+
+#welcome{
+    position: relative;
+    transform: translate(0% , -170%);
+    height: 60vh;
+    text-align: center;
+    z-index: 10;
+}
+
+#hero {
+height: 60vh;
+display: flex;
+align-items: flex-end;
+justify-content: center;
+color: white;
+}
+
+.subheading{
+    font-size: 7.8rem;
+    font-family: "Montez" , cursive;
+    color: #c59d5f;
+    letter-spacing: 2px;
+    line-height: .8;
+    animation: fadeUp 2s forwards;
+}
+.headline{
+    font-size: 2.7rem;
+    font-family: 'Source sans pro' , sans-serif;
+    font-weight: 900;
+    letter-spacing: .5rem;
+}
+.separator{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.line{
+    width: 10%;
+    height: .25vh;
+    background-color: #fff;
+    position: relative;
+}
+
+.line-right::before,
+.line-left::before{
+    content:'';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: .6rem solid transparent;
+
+}
+.line-right::before{
+    border-right-color: #fff;
+    right: 0;
+
+}
+
+
+.line-left::before{
+    border-left-color: #fff;
+    left: 0;
+
+}
+
+.fa-asterisk{
+    color: rgba(0,0,0,0.7);
+    margin: 0 2rem;
+}
+ .description h5{
+    color: white;
+    font-size: 1rem;
+    font-weight: 100;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    letter-spacing: 3px;
+    
+
+}
+
+.btn{
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+
+}
+
+#hero .single-animation .cta-btn{
+    background-color: #fff;
+    color: #515151;
+}
+
+#hero .single-animation .cta-btn:hover,
+#hero .single-animation .cta-btn:focus{
+    color: #fff;
+    background-color: #c59d5f;
+}
+
+
+#nav {
+    float:none;
+    margin:4% auto;
+    display: block;
+    text-align: center;
+}
+
+.navbar-nav > li {
+    display: inline-block;
+    float:none;
+}
+
+.navbar-nav li{
+    padding-left:30px;
+    padding-right:40px;
+  }
+
+.navbar li:nth-of-type(4) {
+    
+   
+    border-right: 1px solid white ;
+}
+
+
+
+@media (max-width:767px) {
+
+    .navbar li:nth-of-type(4)
+    {
+      border:0px solid !important;
+      }
+
+      #wel{
+
+        font-size: 6vw;
+      }
+
+    }
+.navbar-brand{
+
+    margin-left: 25px;
+}
+
+
+
+h1{
+    text-align: center;
+    font-family: 'Montez',cursive;
+}
+
+
+
+
+#welcome a{
+    color: rgba(255,255,255,0.8);
+    transition: ease-in-out 0.4s;
+}
+
+#welcome a:hover{
+
+    color: #3e4040;
+
+}
+
+
+
+.navbar li:nth-of-type(5) {
+
+    margin-left: 30px;
+
+   
+    
+    
+  
+    background: linear-gradient(145deg, #5bc6ff, #4da7db);
+    cursor: pointer !important;
+    
+   transition: ease-in-out 0.4s;
+
+    border-radius: 3px;
+    
+    }
+    
+.navbar li:nth-of-type(5):hover{
+
+    background: white;
+
+}
+   
+#welcome li:nth-of-type(5) a{
+
+    transition: ease-in-out 1s;
+}
+
+.secondpage{
+    width: 100%;
+    height: 70vh;
+    margin-top: 8%;
+    text-align: center;
+}
+
+.secondpage h1 {
+    font-size: 60px;
+}
+
+
+.discover-story .global-headline h2{
+
+    text-align: center;
+    font-family: 'Montez' , cursive;
+    font-size: 7rem;
+    color: #c59d5f;
+
+}
+.discover-story p{
+    text-align: justify;
+}
+
+.global-headline {
+    text-align: center;
+}
+
+
+.global-headline .fa-asterisk{
+    color: rgba(0,0,0,0.7);
+    margin: 2.4rem 0;
+}
+
+.headline-dark{
+    color: #252525;
+    line-height: 0;
+    font-size: 2.5rem;
+    letter-spacing: .7rem;
+    font-weight: 1000;
+}
+
+.rest-des p {
+    line-height: 2;
+}
+.discover-story .rest-des {
+    text-align: center;
+}
+.body-btn{
+    position: relative;
+transition: color .5s;
+}
+
+.rest-des a{
+    color: #c59d5f;
+    padding: 0;
+}
+.body-btn::before{
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    bottom: -3px;
+    background-color: #c59d5f;
+    transition: background-color .5s;
+}
+
+.global-headline .fa-asterisk{
+    line-height: 0;
+}
+
+.body-btn:hover,
+.body-btn:focus{
+    color: #252525;
+}
+
+.body-btn:hover::before,
+.body-btn:focus::before{
+    background-color: #252525;
+}
+
+.c-contain{
+    width: 60%;
+    margin: auto;
+    
+}
+
+.discover-story .rest-info-img{
+    width: 70vw;
+    height: 70vh;
+   background-image: url("1.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin: 0 auto;
+    animation: slide 15s infinite;
+}
+
+#del{
+    display: inline;
+}
+
+.jumbotron h1{
+
+    text-align: left;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media screen and (max-width:900px){
+    #navbarNav ul{
+        text-align: left;
+
+}
+
+}
+
+
+
+@media screen and (max-width:1000px){
+    #hero{
+        align-items: flex-end;
+    }
+        .subheading{
+            font-size: 7rem;
+            letter-spacing: 3px;
+            line-height: .8;
+        }
+        .headline{
+            font-size: 2.5rem;
+            letter-spacing: .5rem;
+        }
+        .single-animation .cta-btn{
+            font-size: 12px;
+        }
+        .description h5{
+        font-size: .8rem;
+        letter-spacing: 2px;
+        }
+        .line{
+            height: .2vh;
+        }
+
+}
+
+@keyframes fadeUp{
+    0%{
+        transform: translateY(6rem);
+        opacity: 0;
+    }
+    100%{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slide{
+
+    25%{
+        background-image: url("3.jpg");
+    }
+    50%{
+        background-image: url("4.jpg");
+    }
+    75%{
+        background-image: url("5.jpg");
+    }
+    80%{
+        background-image: url("6.jpg");
+    }
+    100%{
+        background-image: url("2.jpg");
+    }
+}
+
+
+
+
+
+
+
+
