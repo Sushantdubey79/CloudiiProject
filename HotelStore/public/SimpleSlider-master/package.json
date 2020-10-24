@@ -1,0 +1,47 @@
+{
+  "name": "simpleslider-js",
+  "version": "1.9.0",
+  "description": "Responsive slider created in pure Javascript",
+  "main": "dist/simpleSlider.min.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michu2k/SimpleSlider.git"
+  },
+  "keywords": [
+    "slider",
+    "javascript",
+    "es6",
+    "carousel",
+    "simpleslider",
+    "slideshow",
+    "javascript-library"
+  ],
+  "author": "Michał Strumpf",
+  "homepage": "https://github.com/michu2k/SimpleSlider#readme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michu2k/SimpleSlider/issues"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "browser-sync": "^2.26.7",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean-css": "^4.2.0",
+    "gulp-eslint": "^6.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-uglify": "^3.0.2"
+  },
+  "browserslist": [
+    ">0.15%",
+    "not dead",
+    "Chrome >= 50",
+    "Edge >= 12",
+    "Firefox >= 50",
+    "Opera >= 50",
+    "not op_mini all"
+  ]
+}

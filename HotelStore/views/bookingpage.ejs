@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>book the hotel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/booking.css">
+</head>
+
+<body>
+
+  <%- include("partials/header") %>
+
+  <div class="container">
+    <div class="row mb-5 mt-2">
+  
+      <div class="col-md-3">
+  
+        <p class="lead">HotelStore</p>
+        <div class="list-group">
+          <li class="list-group-item active">Info 1</li>
+          <li class="list-group-item">Info 2</li>
+          <li class="list-group-item">Info 3</li>
+        </div>
+  
+      </div>
+      <div class="col-md-9">
+
+        
+        <div id="splide" class="splide">
+          <div class="splide__track">
+            <ul class="splide__list">
+            <li class="splide__slide"><img class="img-responsive" src=" <%= Hotel.img1 %>" alt="" width="100%"></li>
+            <li class="splide__slide"><img class="img-responsive" src=" <%= Hotel.img2 %>" alt="" width="100%"></li>
+            <li class="splide__slide"><img class="img-responsive" src=" <%= Hotel.img3 %>" alt="" width="100%"></li>
+            <li class="splide__slide"><img class="img-responsive" src=" <%= Hotel.img4 %>" alt="" width="100%"></li>
+            </ul>
+          </div>
+          </div>
+
+        <div style="padding: 0;font-family: 'Quicksand' ,sans-serif;" class="img-thumbnail mb-5">
+          
+  
+
+            <div style="padding: 9px; text-align: justify;">
+              <div  class="caption mt-3">
+                <h4 style="display: inline;float:right;"> $ <%=Hotel.price%>/night</h4>
+                <h4 ><a href=""><%= Hotel.name %></a></h4>
+              </div>
+        
+              <p class="mt-2">
+                <%= Hotel.description %>
+              </p>
+              <hr>
+    
+              
+           <div class="description">
+	        <p><%=Hotel.address%></p>
+            </div>	
+
+
+              <hr>
+              <p>
+                <div class="meta" style="display: inline;float: right;"> 
+                  <span class="date">Created on <%= Hotel.created.toDateString() %></span>
+                  </div>
+                
+                <em>Submitted by <%= Hotel.author.username %></em>
+              </p>
+        
+            
+            </div>
+          </div>
+
+
+          
+			<div class="card card-body bg-light mt-3">
+				<div class="text-right">
+					<a class="btn btn-success" href="/hotels/<%= Hotel._id %>/comments/new">Add a new Comment</a>
+				</div>
+
+				<hr>
+
+				<% Hotel.comments.forEach(function(comment){ %>
+	
+						<div class="row mt-4">
+							<div class="col-md-12">
+
+								<strong><%= comment.author.username %></strong>
+								<span style="display:inline;float: right;">10 days ago</span>
+								<p>
+									<%= comment.text %>
+                </p>
+                						
+		<%	if( currentUser && comment.author.id.equals(currentUser.id) ){ %>
+      <a class="btn btn-sm btn-warning" href="/hotels/<%= Hotel._id %>/comments/<%= comment._id %>/edit">Edit</a>
+      <form id="del" action="/hotels/<%= Hotel._id %>/comments/<%=comment.id%>?_method=DELETE" method="POST">
+        <button  class="btn btn-sm btn-danger" >Delete</button>
+        </form>				
+  <% } %>
+      
+							</div>
+						</div>
+	
+					<%})%>
+			</div>
+
+          
+<div style="border: 1px solid #000000; box-shadow: 5px 5px 5px 5px rgba(105,105,105,.4); background-color: rgba(0,123,255,.4);width:100%;font-family: 'Quicksand' ,sans-serif;" class="container mt-5">
+	<h1 style="text-align: center;"> Make Your Reservations </h1>
+	<form>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="firstname"><strong>First Name</strong></label>
+      <input type="text" class="form-control" id="firstname" placeholder="First Name">
+    </div>
+    <div class="form-group col-md-6">
+      <label for="lastname"><strong>Last Name</strong></label>
+      <input type="text" class="form-control" id="lastname" placeholder="Last Name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="emailaddress"><strong>Email Address</strong></label>
+    <input type="email" class="form-control" id="emailaddress" placeholder="email@mail.com">
+  </div>
+  <div class="form-group">
+    <label for="phone"><strong>Phone Number</strong></label>
+    <input type="tel" class="form-control" id="phone" pattern="[0-9]{10}" placeholder="1234567890">
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="sel_id"><strong>Id type</strong></label>
+      <select id="sel_id" class="form-control">
+        <option selected>Choose...</option>
+        <option>Aadhar card</option>
+        <option>Pan card</option>
+        <option>Voter id</option>
+      </select>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="inputID"><strong>Enter Id Number</strong></label>
+      <input type="text" class="form-control" id="inputID">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="room"><strong>Choose Room Number</strong></label>
+    <input type="Number" class="form-control" id="room" min="100" max="300" placeholder="Between 100-300">
+  </div>
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label  for="birthday"><strong>Check in date</strong></label>
+  	  <input type="date" class="form-control" id="birthday" name="birthday">
+    </div>
+    <div class="form-group col-md-6">
+      <label for="birthday1"><strong>check out date</strong></label>
+  	  <input type="date" class="form-control" id="birthday1" name="birthday1">
+    </div>
+  </div>
+  <button style="margin-bottom: 5px;" type="submit" class="btn btn-success">Book</button>
+</form>
+
+</div>
+
+        </div>
+
+
+          
+        </div>
+      
+      </div>
+    
+      
+  
+    </div>
+  
+  
+
+
+</body>
+</html>
+
+
+<%- include("partials/footer") %>

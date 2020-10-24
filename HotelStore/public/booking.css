@@ -13,6 +13,14 @@ body{
     width: 70vw;
 }
 
+.container header .jumbotron{
+    width: 100%;
+    background-image: url("back2.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .bg{
 position: relative;
     background-repeat: no-repeat;
@@ -22,6 +30,18 @@ position: relative;
     background-size:cover;
 margin: 0 auto;
 }
+
+.pos-f-t .navbar-expand-lg #nav{
+    margin: 0;
+    padding: 0;
+}
+
+.pos-f-t .navbar-expand-lg .navbar-collapse{
+   
+  
+}
+
+
 
 .main{
     width:100%;

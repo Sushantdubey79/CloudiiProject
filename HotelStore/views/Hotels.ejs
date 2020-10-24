@@ -1,12 +1,18 @@
 <%- include("partials/header") %>
 
+<link rel="stylesheet" href="/booking.css">
+
 <div class="container">
-<header class="jumbotron mt-5">
+<header class="jumbotron mt-5" style="  width: 100%;
+background-image: url(back2.jpg);
+background-position: center;
+background-repeat: no-repeat;
+background-size: cover;">
 		<h1 class="ui huge header" style="font-size: 36px;" >
 	This is the HotelStore Page
 		</h1>
 		<p style="font-size: 15px;">Providing Hotels since 2020</p>
-		<a class="btn btn-primary btn-large" href="" style="text-decoration:none;color:white;">Add a New Hotel</a>
+		<a class="btn btn-primary btn-large" href="/hotels/newHotel" style="text-decoration:none;color:white;">Add a New Hotel</a>
 </header>
 
 	
@@ -18,9 +24,13 @@
 	<div class="ui card mb-5">
 		
 		<div class="image">
-<img src="<%=hotel.img%>" width="100%">
+<img src="<%= hotel.img1 %>" width="100%">
 		</div>
-<div class="content">
+
+
+
+
+	<div class="content">
 	<div class="header">
 	<div class="caption mt-3 mb-3">
 		<h4><%= hotel.name %></h4>
@@ -28,9 +38,15 @@
 	</div>
 <div class="description mb-3">
 	<p style="text-align: justify;" ><%= hotel.description.substring(0,100) %>...</p>
+	
+		
+<div class="meta" style=" text-align: right;"> 
+	<span> $<%= hotel.price %></span>
+  </div>
 </div>
 <hr>
-<div class="meta" style="text-align: right;"> 
+
+<div class="meta" style=" text-align: right;"> 
 	<span class="date">Created on <%= hotel.created.toDateString() %></span>
   </div>
 

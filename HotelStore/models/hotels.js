@@ -2,7 +2,10 @@ var mongoose = require("mongoose");
 
 var hotelSchema = new mongoose.Schema({
 	name:String,
-	img:String,
+    img1:String,
+    img2:String,
+    img3:String,
+    img4:String,
     description:String,
     address:String,
     price:String,
