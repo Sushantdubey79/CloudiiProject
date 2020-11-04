@@ -1,3 +1,8 @@
+if(process.env.NODE_ENV !== "production"){
+    require('dotenv').config()
+}
+const  stripePublickey= process.env.Stripe_public_key;
+
 var express = require("express"),
     app = express(),
     passport = require("passport"),
@@ -7,20 +12,29 @@ var express = require("express"),
     GoogleStrategy = require("passport-google-oauth").OAuth2Strategy,
     Hotel = require("./models/hotels"),
     User = require("./models/user"),
+    Review = require("./models/reviews"),
+    fs = require("fs"),
+    validator = require("aadhaar-validator"),
     Comment = require("./models/comments"),
+    Customer = require("./models/customer"),
     cookieSession = require('cookie-session'),
     findOrCreate = require("mongoose-findorcreate"),
-    flash = require("connect-flash");
+    flash = require("connect-flash"),   
+    multer = require('multer'),
+    {storage} = require("./cloudinary"),  
+    upload = multer({storage}),
+    stripe  = require("stripe")(stripePublickey),
+    sgMail = require("@sendgrid/mail"),
+    expressSanitizer = require("express-sanitizer"),
+    crypto = require("crypto");
 
-
-
-
+ sgMail.setApiKey(process.env.sendGrid_api_key);
 app.use(express.static("public"));
 app.set("view engine" , "ejs");
 app.use(methodOverride("_method"));
 
-
 const mongoose = require('mongoose');
+const customer = require('./models/customer');
 mongoose.connect('mongodb://localhost/Banaras_Project', {
       useNewUrlParser: true,
       useUnifiedTopology: true
@@ -42,7 +56,7 @@ app.use(require("express-session")({
 	saveUninitialized:false
 }))
 
-
+app.use(express.json())
 app.use( body.urlencoded({extended:true}));
 app.use(passport.initialize())
 app.use(passport.session())
@@ -54,7 +68,7 @@ app.use(function(req,res,next){
     res.locals.success = req.flash("success");
 	next();
 })
-
+app.use(expressSanitizer());
 passport.use(new LocalStrategy(User.authenticate()))
 
 passport.serializeUser(User.serializeUser())
@@ -95,6 +109,10 @@ app.get('/auth/google/callback',
 ));
 
 
+
+console.log(validator.isValidVID(''))
+
+
     
 app.get("/" , function(req,res){
     res.render("booking")
@@ -102,12 +120,6 @@ app.get("/" , function(req,res){
 
 /*
 Hotel.create({
-    name:"Chandan Bhaiya ka room",
-    img:["banaras1.jpg","banaras3.jpg" ],
-    description:"Bhut hi sasta aut tikauu ",
-    address:"Shaitaan Gali , Khatra Mahal , Shamsaan ke Samnee ",
-    price:"300rs/Night"
-
 }, function(err,hotel){
     if(err){
         console.log(err)
@@ -122,32 +134,23 @@ app.get("/hotels/newHotel", isLoggedIn ,function(req,res){
     res.render("new")
 })
 
-app.post("/hotels" , isLoggedIn,function(req , res){
-    var name = req.body.name;
-    var price = req.body.price;
-    var img1 = req.body.image1;
-    var img2 = req.body.image2;
-    var img3 = req.body.image3;
-    var img4 = req.body.image4;
-    var desc = req.body.description;
-    var address = req.body.address;
-	var author = {
-		id: req.user.id ,
-		username: req.user.username
-	}
-	var newHotel = {name:name , img1:img1 ,price:price, img2:img2,img3:img3, img4:img4, description:desc , address:address, author:author} 
-	Hotel.create(newHotel , function(err , newlyHotel){
-		if(err){
-			console.log(err)
-		}else{
-            req.flash("success","Successfully added Hotel")
-			res.redirect("/hotels")
-			
-		}
-	})
+app.post("/hotels" , isLoggedIn,upload.array('image'),function(req, res) {
+
+              Hotel.create(req.body.hotel, function (err, hotels) {
+                if (err) {
+                    req.flash('error', err.message);
+                    return res.redirect('back');
+                }
+                
+
+                hotels.image = req.files.map( f=> ({ url:f.path ,filename:f.filename }));
+               hotels.author = req.user._id;
+                hotels.save();
+                
+                res.redirect('/hotels');
+            });
+    
 })
-
-
 
 
 app.get("/hotels" , function(req,res){
@@ -161,19 +164,157 @@ app.get("/hotels" , function(req,res){
 });
 
 
-app.get("/hotels/:id",function(req,res){
+app.post('hotels/:id/payment', function(req, res){ 
+  
+   
+    const { paymentMethodId, items, currency } = req.body;
 
-    Hotel.findById(req.params.id).populate("comments").exec(function(err,foundhotel){
+    const amount = 2000;
+  
+    try {
+      // Create new PaymentIntent with a PaymentMethod ID from the client.
+      const intent = stripe.paymentIntents.create({
+        amount,
+        currency,
+        payment_method: paymentMethodId,
+        error_on_requires_action: true,
+        confirm: true
+      });
+  
+      console.log("💰 Payment received!");
+
+      req.user.isPaid = true;
+      req.user.save();
+      // The payment is complete and the money has been moved
+      // You can add any post-payment code here (e.g. shipping, fulfillment, etc)
+  
+      // Send the client secret to the client to use in the demo
+      res.send({ stripePublickey : intent.stripePublickey });
+    } catch (e) {
+      // Handle "hard declines" e.g. insufficient funds, expired card, card authentication etc
+      // See https://stripe.com/docs/declines/codes for more
+      if (e.code === "authentication_required") {
+        res.send({
+          error:
+            "This card requires authentication in order to proceeded. Please use a different card."
+        });
+      } else {
+        res.send({ error: e.message });
+      }
+    }
+});
+
+
+
+
+app.get("/hotels/:id", isLoggedIn ,function(req,res){
+
+    Hotel.findById(req.params.id).populate("comments").populate("reviews").exec(function(err,foundhotel){
         if(err){
             console.log(err)
         }else{
-            res.render("bookingpage" , { Hotel : foundhotel })
+            console.log(foundhotel)
+            console.log(foundhotel.reviews)
+            foundhotel.comments.map(f=>({author:req.user}))
+            res.render("bookingpage" , { Hotel : foundhotel,stripePublickey:stripePublickey })
+        
         }
     })
 
 
 
 })
+
+
+
+
+
+
+
+
+
+
+app.get("/hotels/:id/edit" , checkHotelOwnership ,function(req,res){
+	
+    Hotel.findById(req.params.id , function(err,foundHotel){
+        if(err){
+            res.redirect("/hotels")
+        }else{
+                res.render("hotel/edit" , {Hotel:foundHotel})
+
+        }
+    })
+})
+
+//Update  Route
+app.put("/hotels/:id", checkHotelOwnership ,function(req,res){
+
+Hotel.findByIdAndUpdate(req.params.id,req.body.hotel,function(err,updateHotel){
+    if(err){
+        console.log(err)
+        res.redirect("/hotels")
+    }else{
+
+        res.redirect("/hotels/"+req.params.id);
+
+    }
+})
+
+
+})
+
+app.delete("/hotels/:id" ,checkHotelOwnership , function(req,res){
+
+Hotel.findByIdAndRemove(req.params.id , function(err,foundHotel){
+    if(err){
+        console.log(err)
+    }else{
+        res.redirect("/hotels");
+    }
+})
+
+})
+
+
+
+
+
+app.post("/hotels/:id/reviews",function(req,res){
+    
+    Hotel.findById(req.params.id , function(err,hotel){
+        if(err){
+            console.log(err)
+        }else{
+            const review = new Review(req.body.review)
+            review.author.username = req.user.username;
+            console.log(review.author.username)
+            hotel.reviews.push(review)
+           
+            review.save()
+            hotel.save()
+            res.redirect("/hotels/"+req.params.id);
+        }
+    }) 
+})
+
+
+
+app.delete("/hotels/:id/reviews/:reviews_id",function(req,res){
+    Review.findByIdAndRemove(req.params.reviews_id , function(err,review){
+        if(err){
+            console.log(err)
+        }else{
+            res.redirect("/hotels/"+req.params.id)
+        }
+    })
+})
+
+
+
+
+
+
+
 
 
 
@@ -255,9 +396,6 @@ app.delete("/hotels/:id/comments/:comment_id" , checkOwnership ,function(req,res
 })
 
 
-
-
-
 app.get("/team" , function(req,res){
     
     res.render("team")
@@ -265,27 +403,72 @@ app.get("/team" , function(req,res){
 
 
 
-app.get("/register" , function(req,res){
+app.get("/register" ,async function(req,res){
      
     res.render("register",{error:req.flash("error")})
 })
-app.post("/register",function(req,res){
+app.post("/register",async function(req,res){
 
-	User.register(new User({username:req.body.username}),req.body.password,function(err,user){
+    var newUser = new User({
+        username:req.body.username,
+        email:req.body.email,
+        emailToken:crypto.randomBytes(64).toString('hex'),
+        isVerified:false,
+    });
+	User.register(newUser ,req.body.password ,async function(err,user){
 		if(err){
 			req.flash("error",err.message)
 			return res.render("register")
-		}else{
-			passport.authenticate("local")(req,res,function(){
-                
-                req.flash("success","Welcome to HotelStore"+user.username)
-
-				res.redirect("/")
-			})
-		}
+        }
+        const msg = {
+            to:user.email,
+            from: "aman.pandey_cs18@gla.ac.in",
+            subject:'HotelStore - Verify your email',
+            text:`Hello Thanks for registering on our website,copy and paste the address below to verify email http://${req.headers.host}/verify-email?token=${user.emailToken}`,
+            html:`<h1>Hello</h1>
+            <p>Thanks for registering on our website</p>
+            <p>Please click the link below to verify your account.</p>
+            <a href="http://${req.headers.host}/verify-email?token=${user.emailToken}" >Verify your account</a>
+            `
+        }
+        try{
+            await sgMail.send(msg);
+            req.flash("success","Thanks for registering . Please check your email to verify your account");
+            res.redirect("/");
+        }
+        catch(error){
+            console.log(error);
+            req.flash('error',"Something went wrong.Please contact us for assistance");
+            console.log(user)
+            res.redirect("/")
+        }
 
 	})
 
+})
+
+app.get("/verify-email",async(req,res,next)=>{
+    try{
+        const user = await User.findOne( {emailToken:req.query.token} );
+    if(!user){
+        req.flash('error','Token is Invalid . Please contact us for assistence')
+        console.log(emailToken)
+        return res.redirect("/");
+    }    
+    user.emailToken = null;
+    user.isVerified = true;
+    await user.save();
+    await req.login(user , async (err)=>{
+        if(err) return next(err)
+        req.flash('success',`Welcome to HotelStore ${user.username}`);
+        const redirectUrl = req.session.redirectTo || '/' ;
+        delete req.session.redirectTo;
+        res.redirect(redirectUrl);
+    })
+    }catch(error){
+        req.flash('error',"something went wrong");
+        res.redirect("/")
+    }
 })
 
 
@@ -296,7 +479,24 @@ app.get("/login", function(req,res){
 	res.render("login" , {error:req.flash("error")}); 
 })
 
-app.post("/login"  , passport.authenticate("local" , {
+async function isNotVerified(req,res,next){
+    try{
+        const user = await User.findOne({username:req.body.username});
+    if(user.isVerified){
+        return next()
+    }
+    req.flash('error',"Your account has not been verified. Please check your mail to verify")
+    return res.redirect("/");
+    }
+    catch{
+        console.log(err) 
+        req.flash('error','Something went wrong , contact us for assistance');
+        res.redirect("/")      
+    }
+}
+
+
+app.post("/login"  , isNotVerified , passport.authenticate("local" , {
     
 	successRedirect:"/",
 	failureRedirect:"/login"
@@ -304,8 +504,6 @@ app.post("/login"  , passport.authenticate("local" , {
 })  , function(req,res){
 
 })
-
-
 
 
 function isLoggedIn(req,res,next){
@@ -316,6 +514,71 @@ function isLoggedIn(req,res,next){
         req.flash("error","You need to be LoggedIn")
 		res.redirect("/login");
 }
+
+
+function checkHotelOwnership(req,res,next){
+
+
+	if(req.isAuthenticated())
+	{
+		Hotel.findById(req.params.id , function(err,foundHotel){
+			if(err){
+				res.render("back")
+			}else{
+				
+				if( foundHotel.author.id.equals(req.user._id)){
+					next()
+				}else{
+					res.redirect("/hotels/"+req.params.id);
+				}
+			}
+		})
+
+	
+	}else{
+
+	console.log("need to be logged In")		
+	res.send("need login In")
+
+	}	
+
+}
+
+
+app.get("/contact",function(req,res){
+    res.render("contact")
+})
+
+app.post("/contact", async (req,res)=>{
+    let {name ,email,message } = req.body;
+    name = req.sanitize(name);
+    email = req.sanitize(email);
+    message = req.sanitize(message);
+    const msg = {
+        to: 'amankpandeyvns@gmail.com',
+        from: req.body.email, // Use the email address or domain you verified above
+        subject: `HotelStore Form submission From${name}`,
+        text: message,
+        html: message,
+      };
+      try {
+        await sgMail.send(msg);
+        req.flash('success','Thank You for your email')
+        res.redirect("/contact")
+      } catch (error) {
+        console.error(error);
+     
+        if (error.response) {
+          console.error(error.response.body)
+        }
+    req.flash('error','Sorry Something is wrong')  
+    res.redirect("/hotels")
+    console.log(msg.to)
+    console.log(req.body.email)
+    }
+    });
+
+
 
 function checkOwnership(req,res,next){
     

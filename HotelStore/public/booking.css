@@ -42,6 +42,9 @@ margin: 0 auto;
 }
 
 
+#del{
+    display: inline;
+}
 
 .main{
     width:100%;

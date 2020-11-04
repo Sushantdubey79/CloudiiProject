@@ -2,14 +2,22 @@ var mongoose = require("mongoose");
 
 var hotelSchema = new mongoose.Schema({
 	name:String,
-    img1:String,
-    img2:String,
-    img3:String,
-    img4:String,
+    image:[
+        {
+            url:String,
+            filename:String
+        }
+    ],  
     description:String,
     address:String,
     price:String,
     created: {type:Date , default:Date.now},
+    reviews:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Review"
+        }
+    ],
     author:{
         id: {
  
@@ -20,6 +28,13 @@ var hotelSchema = new mongoose.Schema({
      },
 	comments:[
         {
+        author:{
+            id: {
+ 
+                type:mongoose.Schema.Types.ObjectId,
+                ref:"User"
+            }, 
+        },
         type:mongoose.Schema.Types.ObjectId,
         ref:"Comment" 
         }

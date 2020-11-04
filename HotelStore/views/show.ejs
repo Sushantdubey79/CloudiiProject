@@ -22,9 +22,9 @@
 				<div id="splide" class="splide">
 					<div class="splide__track">
 					  <ul class="splide__list">
-						<li class="splide__slide"><img class="img-responsive" src=" /<%= Hotel.img[0] %>" alt="" width="100%"></li>
-						<li class="splide__slide"><img class="img-responsive" src=" /<%= Hotel.img[0] %>" alt="" width="100%"></li>
-						<li class="splide__slide"><img class="img-responsive" src=" /<%= Hotel.img[0] %>" alt="" width="100%"></li>
+						  <% for(let img of Hotel.image){ %>
+						<li class="splide__slide"><img class="img-responsive" src=" <%= img.url %>" alt="" width="100%"></li>
+						<% } %>
 					  </ul>
 					</div>
 				  
