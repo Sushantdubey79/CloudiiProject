@@ -33,8 +33,10 @@ app.use(express.static("public"));
 app.set("view engine" , "ejs");
 app.use(methodOverride("_method"));
 
+
 const mongoose = require('mongoose');
 const customer = require('./models/customer');
+const { findById } = require('./models/hotels');
 mongoose.connect('mongodb://localhost/Banaras_Project', {
       useNewUrlParser: true,
       useUnifiedTopology: true
@@ -42,8 +44,8 @@ mongoose.connect('mongodb://localhost/Banaras_Project', {
 .then(() => console.log('Connected to DB!'))
 .catch(error => console.log(error.message));
 
-
- 
+var j;
+console.log(User._id) 
 app.use(cookieSession({
     name: 'HotelStore-session',
     keys: ['key1', 'key2']
@@ -64,6 +66,9 @@ app.use(flash())
 
 app.use(function(req,res,next){
     res.locals.currentUser = req.user;
+    if (req.user!= undefined){
+        j = req.user._id;
+    }
     res.locals.error = req.flash("error");
     res.locals.success = req.flash("success");
 	next();
@@ -112,7 +117,7 @@ app.get('/auth/google/callback',
 
 console.log(validator.isValidVID(''))
 
-
+console.log();
     
 app.get("/" , function(req,res){
     res.render("booking")
@@ -129,7 +134,6 @@ Hotel.create({
 });*/
 
 
-
 app.get("/hotels/newHotel", isLoggedIn ,function(req,res){
     res.render("new")
 })
@@ -141,11 +145,16 @@ app.post("/hotels" , isLoggedIn,upload.array('image'),function(req, res) {
                     req.flash('error', err.message);
                     return res.redirect('back');
                 }
-                
-
+                for(let r = 1;r <= 10;r++){
+                hotels.Notbooked.push(r);
+            }
+                console.log(hotels.Notbooked);
+                hotels.booked = [];
                 hotels.image = req.files.map( f=> ({ url:f.path ,filename:f.filename }));
                hotels.author = req.user._id;
                 hotels.save();
+                
+
                 
                 res.redirect('/hotels');
             });
@@ -162,50 +171,6 @@ app.get("/hotels" , function(req,res){
        }
     })
 });
-
-
-app.post('hotels/:id/payment', function(req, res){ 
-  
-   
-    const { paymentMethodId, items, currency } = req.body;
-
-    const amount = 2000;
-  
-    try {
-      // Create new PaymentIntent with a PaymentMethod ID from the client.
-      const intent = stripe.paymentIntents.create({
-        amount,
-        currency,
-        payment_method: paymentMethodId,
-        error_on_requires_action: true,
-        confirm: true
-      });
-  
-      console.log("💰 Payment received!");
-
-      req.user.isPaid = true;
-      req.user.save();
-      // The payment is complete and the money has been moved
-      // You can add any post-payment code here (e.g. shipping, fulfillment, etc)
-  
-      // Send the client secret to the client to use in the demo
-      res.send({ stripePublickey : intent.stripePublickey });
-    } catch (e) {
-      // Handle "hard declines" e.g. insufficient funds, expired card, card authentication etc
-      // See https://stripe.com/docs/declines/codes for more
-      if (e.code === "authentication_required") {
-        res.send({
-          error:
-            "This card requires authentication in order to proceeded. Please use a different card."
-        });
-      } else {
-        res.send({ error: e.message });
-      }
-    }
-});
-
-
-
 
 app.get("/hotels/:id", isLoggedIn ,function(req,res){
 
@@ -224,6 +189,95 @@ app.get("/hotels/:id", isLoggedIn ,function(req,res){
 
 
 })
+
+app.put("/hotels/:id", checkHotelOwnership ,function(req,res){
+
+    Hotel.findByIdAndUpdate(req.params.id,req.body.hotel,function(err,updateHotel){
+        if(err){
+            console.log(err)
+            res.redirect("/hotels")
+        }else{
+    
+            res.redirect("/hotels/"+req.params.id);
+    
+        }
+    })
+    
+    
+    })
+    
+    app.delete("/hotels/:id" ,checkHotelOwnership , function(req,res){
+    
+    Hotel.findByIdAndRemove(req.params.id , function(err,foundHotel){
+        if(err){
+            console.log(err)
+        }else{
+            res.redirect("/hotels");
+        }
+    })
+    
+    })
+    let n;
+    let data;
+app.get("/receipt",(req,res)=>{
+    let t = Object.assign(n,data);
+    res.render("receipt",{t})
+})
+
+app.post('/hotels/:id/payment', function(req, res){ 
+    const { id } = req.params;
+    const  roomdata  = req.body;
+    data = roomdata;
+    const room = roomdata.Rooms;
+    const amount = 2000;
+    console.log(data);
+    User.findById(j, (err,hotel)=>{
+        hotel.booked.push({_id:id,rooms:room});
+        hotel.save();
+    })
+    
+    
+    Hotel.findById( id , (err,hotels)=>{
+        n = hotels;
+        const index = hotels.Notbooked.indexOf(room);
+        hotels.Notbooked.splice(index,1);
+        hotels.booked.push(Number(room));
+        hotels.save();
+    })
+
+  
+    try {
+      // Create new PaymentIntent with a PaymentMethod ID from the client.
+      const intent = stripe.paymentIntents.create({
+        amount,
+        //currency,
+        payment_method: "card",
+        error_on_requires_action: true,
+        confirm: true
+      });
+
+      
+  
+      console.log("💰 Payment received!");
+
+      req.user.isPaid = true;
+      req.user.save(); 
+      res.redirect("/receipt");
+    } catch (e) {
+      // Handle "hard declines" e.g. insufficient funds, expired card, card authentication etc
+      // See https://stripe.com/docs/declines/codes for more
+      if (e.code === "authentication_required") {
+        res.send({
+          error:
+            "This card requires authentication in order to proceeded. Please use a different card."
+        });
+      } else {
+        res.send({ error: e.message });
+      }
+    }
+});
+
+
 
 
 
@@ -247,36 +301,6 @@ app.get("/hotels/:id/edit" , checkHotelOwnership ,function(req,res){
 })
 
 //Update  Route
-app.put("/hotels/:id", checkHotelOwnership ,function(req,res){
-
-Hotel.findByIdAndUpdate(req.params.id,req.body.hotel,function(err,updateHotel){
-    if(err){
-        console.log(err)
-        res.redirect("/hotels")
-    }else{
-
-        res.redirect("/hotels/"+req.params.id);
-
-    }
-})
-
-
-})
-
-app.delete("/hotels/:id" ,checkHotelOwnership , function(req,res){
-
-Hotel.findByIdAndRemove(req.params.id , function(err,foundHotel){
-    if(err){
-        console.log(err)
-    }else{
-        res.redirect("/hotels");
-    }
-})
-
-})
-
-
-
 
 
 app.post("/hotels/:id/reviews",function(req,res){

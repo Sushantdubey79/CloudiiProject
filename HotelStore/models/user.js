@@ -7,7 +7,13 @@ var userSchema = new mongoose.Schema({
     email:String,
     emailToken:String,
     isVerified:Boolean,
-    isPaid:{type:Boolean,default:false}
+    isPaid:{type:Boolean,default:false},
+    booked: [{
+
+            _id: String,
+            rooms: Number
+        }
+        ]
 })
 
 userSchema.plugin(passportLocalMongoose);

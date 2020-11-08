@@ -71,16 +71,77 @@
               </p>
 
 
-		<%	if( currentUser && Hotel.author.id.equals(currentUser.id) ){ %>
+		<%	if( currentUser && Hotel.author.id === (currentUser.id) ){ %>
 			<a class="btn btn-warning" href="/hotels/<%= Hotel._id %>/edit">Edit</a>
 		<form id="del" action="/hotels/<%= Hotel._id %>?_method=DELETE" method="POST">
 		<button  class="btn btn-danger" >Delete</button>
 		</form>
 		<% } %>
             
+
             </div>
           </div>
-          <h2>Leave a Review</h2>
+
+          <div style="border: 1px solid #000000; box-shadow: 5px 5px 5px 5px rgba(105,105,105,.4); background-color: rgba(0,123,255,.4);width:100%;font-family: 'Quicksand' ,sans-serif;" class="container mt-5">
+            <h1 style="text-align: center;"> Make Your Reservations </h1>
+            <form class="bookForm" action="/hotels/<%=Hotel.id%>/payment" accept="payment" method="POST"> 
+              
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="firstname"><strong>First Name</strong></label>
+                <input type="text" class="form-control" id="firstname" name="FirstName" placeholder="FirstName" required>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="lastname"><strong>Last Name</strong></label>
+                <input type="text" class="form-control" id="lastname" name="LastName" placeholder="LastName" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="emailaddress"><strong>Email Address</strong></label>
+              <input type="email" class="form-control" id="emailaddress" name="Email" placeholder="email@mail.com" required>
+            </div>
+            <div class="form-group">
+              <label for="phone"><strong>Phone Number</strong></label>
+              <input type="tel" class="form-control" id="phone" name="PhoneNumber" pattern="[0-9]{10}" placeholder="1234567890" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label  for="birthday"><strong>Check in date</strong></label>
+                <input type="date" class="form-control" id="checkIn" name="checkIn" required>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="birthday1"><strong>check out date</strong></label>
+                <input type="date" class="form-control" id="checkOut" name="checkOut" >
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="room"><strong>Choose Room No</strong></label>
+              <select class="form-control" name="Rooms" id="room" required>
+                <option value="" selected disabled>Select</option>
+                <% if(Hotel.Notbooked.length === 0){ %>
+                      <option value="" disabled>No rooms available</option>
+                  <% } else{ %>
+                 <% for(let hotel1 of Hotel.Notbooked){ %>
+                       <option value="<%= hotel1%>"><%=hotel1%></option>
+                 <% } }%>
+              </select>
+            </div>
+            <button id="Book" style="margin-bottom: 5px;" type="submit" class="btn btn-success">Book</button>
+            <script 
+            src="//checkout.stripe.com/v2/checkout.js"
+            class="stripe-button"
+            data-key="<%= stripePublickey %>" 
+            data-amount="<%=Hotel.price%>*100" 
+            data-currency="Rs" 
+            data-name="<%=Hotel.name%>"
+            data-description="<%=Hotel.description%>" 
+            data-locale="auto" > 
+           </script>
+          </form>
+          
+          </div>
+
+          <h2 class="mt-5">Leave a Review</h2>
           <form action="/hotels/<%= Hotel._id%>/reviews" method="POST" class="mb-3" novalidate>
 
 
@@ -148,7 +209,7 @@
 									<%= comment.text %>
                 </p>
                 						
-		<%	if( currentUser && comment.author.id.equals(currentUser.id) ){ %>
+		<%	if( currentUser && comment.author.id === (currentUser.id) ){ %>
       <a class="btn btn-sm btn-warning" href="/hotels/<%= Hotel._id %>/comments/<%= comment._id %>/edit">Edit</a>
       <form id="del" action="/hotels/<%= Hotel._id %>/comments/<%=comment.id%>?_method=DELETE" method="POST">
         <button  class="btn btn-sm btn-danger" >Delete</button>
@@ -162,71 +223,6 @@
 			</div>
 
           
-<div style="border: 1px solid #000000; box-shadow: 5px 5px 5px 5px rgba(105,105,105,.4); background-color: rgba(0,123,255,.4);width:100%;font-family: 'Quicksand' ,sans-serif;" class="container mt-5">
-	<h1 style="text-align: center;"> Make Your Reservations </h1>
-	<form class="bookForm" action="/hotels/<%=Hotel.id%>/payment" accept="payment" method="POST"> 
-    
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="firstname"><strong>First Name</strong></label>
-      <input type="text" class="form-control" id="firstname" name="customer[FirstName]" placeholder="FirstName" required>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="lastname"><strong>Last Name</strong></label>
-      <input type="text" class="form-control" id="lastname" name="customer[LastName]" placeholder="LastName" required>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="emailaddress"><strong>Email Address</strong></label>
-    <input type="email" class="form-control" id="emailaddress" name="customer[Email]" placeholder="email@mail.com" required>
-  </div>
-  <div class="form-group">
-    <label for="phone"><strong>Phone Number</strong></label>
-    <input type="tel" class="form-control" id="phone" name="customer[PhoneNumber]" pattern="[0-9]{10}" placeholder="1234567890" required>
-  </div>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="sel_id"><strong>Id type</strong></label>
-      <select id="sel_id" class="form-control" name="customer[Id]" required>
-        <option selected>Choose...</option>
-        <option>Aadhar card</option>
-        <option>Pan card</option>
-        <option>Voter id</option>
-      </select>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="inputID"><strong>Enter Id Number</strong></label>
-      <input type="text" class="form-control" name="customer[Idno]" id="inputID" required>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="room"><strong>Choose Rooms</strong></label>
-    <input type="Number" class="form-control" name="customer[Rooms]" id="room" min="1" max="100" placeholder="1-100" required>
-  </div>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label  for="birthday"><strong>Check in date</strong></label>
-  	  <input type="date" class="form-control" id="checkIn" name="customer[checkIn]" required>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="birthday1"><strong>check out date</strong></label>
-  	  <input type="date" class="form-control" id="checkOut" name="customer[checkOut]" >
-    </div>
-  </div>
-  <button id="Book" style="margin-bottom: 5px;" type="submit" class="btn btn-success">Book</button>
-  <script 
-  src="//checkout.stripe.com/v2/checkout.js"
-  class="stripe-button"
-  data-key="<%= stripePublickey %>" 
-  data-amount="<%=Hotel.price%>*100" 
-  data-currency="usd" 
-  data-name="<%=Hotel.name%>" 
-  data-description="<%=Hotel.description%>" 
-  data-locale="auto" > 
- </script>
-</form>
-
-</div>
 
         </div>
 

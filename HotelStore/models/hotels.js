@@ -38,7 +38,12 @@ var hotelSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Comment" 
         }
+    ],
+    Notbooked: [
+    ],
+    booked: [
     ]
+
 })
 
 var Hotel = mongoose.model("Hotel" , hotelSchema)
